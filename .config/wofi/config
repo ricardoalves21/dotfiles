@@ -1,0 +1,15 @@
+mode=drun
+show=drun
+allow_images=true
+image_size=24
+width=420
+height=380
+prompt=Pesquisar...
+term=kitty
+hide_scroll=true
+no_actions=true
+insensitive=true
+location=center
+gtk_dark=true
+layer=overlay
+lines=6

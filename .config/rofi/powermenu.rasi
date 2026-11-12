@@ -1,0 +1,110 @@
+/**
+ * Tema do Power Menu para o Rofi (Catppuccin Mocha)
+ */
+
+@theme "/dev/null"
+
+* {
+    bg-col:       #1e1e2ef2;
+    bg-col-light: #313244;
+    border-col:   #89b4fa;
+    selected-col: #45475a;
+    blue:         #89b4fa;
+    fg-col:       #cdd6f4;
+    fg-sub:       #bac2de;
+    red:          #f38ba8;
+    grey:         #6c7086;
+    font:         "JetBrainsMono Nerd Font 12";
+
+    background-color: transparent;
+    text-color:       @fg-col;
+    margin:           0;
+    padding:          0;
+    spacing:          0;
+}
+
+window {
+    width:            400px;
+    background-color: @bg-col;
+    border:           2px;
+    border-color:     @border-col;
+    border-radius:    14px;
+    padding:          16px;
+    location:         center;
+    anchor:           center;
+}
+
+mainbox {
+    background-color: transparent;
+    children:         [ inputbar, message, listview ];
+    spacing:          12px;
+}
+
+inputbar {
+    background-color: @bg-col-light;
+    border-radius:    8px;
+    padding:          8px 12px;
+    children:         [ prompt, entry ];
+    spacing:          8px;
+}
+
+prompt {
+    background-color: transparent;
+    text-color:       @red;
+    font:             "JetBrainsMono Nerd Font Bold 12";
+}
+
+entry {
+    background-color:  transparent;
+    text-color:        @fg-col;
+    placeholder:       "Pesquisar ação...";
+    placeholder-color: @grey;
+}
+
+message {
+    background-color: @bg-col-light;
+    border-radius:    8px;
+    padding:          8px 12px;
+}
+
+textbox {
+    background-color: transparent;
+    text-color:       @fg-sub;
+    font:             "JetBrainsMono Nerd Font 10";
+}
+
+listview {
+    background-color: transparent;
+    lines:            6;
+    columns:          1;
+    spacing:          6px;
+    cycle:            true;
+    dynamic:          true;
+    scrollbar:        false;
+    fixed-height:     false;
+}
+
+element {
+    background-color: transparent;
+    text-color:       @fg-col;
+    border-radius:    8px;
+    padding:          10px 14px;
+    spacing:          12px;
+}
+
+element selected.normal {
+    background-color: @selected-col;
+    text-color:       @blue;
+}
+
+element-text {
+    background-color: transparent;
+    text-color:       inherit;
+    vertical-align:   0.5;
+    markup:           true;
+}
+
+element-icon {
+    background-color: transparent;
+    size:             20px;
+}

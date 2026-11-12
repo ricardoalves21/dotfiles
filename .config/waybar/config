@@ -1,0 +1,407 @@
+[
+{
+    "name": "waybar-side",
+    "layer": "top",
+    "position": "left",
+    "output": "HDMI-A-1",
+    "width": 48,
+    "margin-top": 12,
+    "margin-bottom": 12,
+    "margin-left": 8,
+    "spacing": 10,
+    "reload_style_on_change": true,
+    "modules-left": ["hyprland/workspaces"],
+    "modules-center": ["clock"],
+    "modules-right": ["custom/updates", "custom/keybinds", "custom/nightlight", "custom/wallpaper", "cpu", "memory", "pulseaudio", "bluetooth", "network"],
+
+    "custom/power": {
+        "exec": "~/.config/hypr/scripts/powermenu.sh json",
+        "return-type": "json",
+        "interval": "once",
+        "on-click": "~/.config/hypr/scripts/powermenu.sh toggle"
+    },
+
+    "custom/nightlight": {
+        "exec": "~/.config/hypr/scripts/nightlight.sh json",
+        "return-type": "json",
+        "interval": "once",
+        "signal": 9,
+        "on-click": "~/.config/hypr/scripts/nightlight.sh toggle",
+        "on-scroll-up": "~/.config/hypr/scripts/nightlight.sh cooler",
+        "on-scroll-down": "~/.config/hypr/scripts/nightlight.sh warmer"
+    },
+
+    "bluetooth": {
+        "format": "󰂯",
+        "format-disabled": "󰂲",
+        "format-connected": "󰂱",
+        "tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} conectados",
+        "tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{num_connections} conectados\n\n{device_enumerate}",
+        "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
+        "on-click": "blueman-manager"
+    },
+
+    "custom/updates": {
+        "exec": "~/.config/hypr/scripts/updates.sh json side",
+        "return-type": "json",
+        "interval": 30,
+        "signal": 10,
+        "on-click": "~/.config/hypr/scripts/updates.sh open",
+        "on-click-right": "~/.config/hypr/scripts/updates.sh menu",
+        "on-click-middle": "~/.config/hypr/scripts/updates.sh refresh"
+    },
+
+    "custom/keybinds": {
+        "exec": "~/.config/hypr/scripts/keybinds.sh json",
+        "return-type": "json",
+        "interval": "once",
+        "signal": 11,
+        "on-click": "~/.config/hypr/scripts/keybinds.sh toggle"
+    },
+
+    "custom/wallpaper": {
+        "exec": "~/.config/hypr/scripts/wallpaper.sh json",
+        "return-type": "json",
+        "interval": "once",
+        "signal": 8,
+        "on-click": "~/.config/hypr/scripts/wallpaper.sh next",
+        "on-click-right": "~/.config/hypr/scripts/wallpaper.sh prev",
+        "on-click-middle": "~/.config/hypr/scripts/wallpaper.sh random",
+        "on-scroll-up": "~/.config/hypr/scripts/wallpaper.sh prev",
+        "on-scroll-down": "~/.config/hypr/scripts/wallpaper.sh next"
+    },
+
+    "hyprland/workspaces": {
+        "cursor": true,
+        "disable-scroll": false,
+        "all-outputs": false,
+        "active-only": false,
+        "on-scroll-up": "hyprctl dispatch focusmonitor HDMI-A-1 && hyprctl dispatch workspace m-1",
+        "on-scroll-down": "hyprctl dispatch focusmonitor HDMI-A-1 && hyprctl dispatch workspace m+1",
+        "on-click": "activate",
+        "format": "{id} {windows}",
+        "format-window-separator": " ",
+        "window-rewrite-default": "󰖯",
+        "window-rewrite": {
+            "title<.*youtube.*>": "",
+            "title<.*github.*>": "",
+            "title<.*whatsapp.*>": "",
+            "class<.*whatsapp.*>": "",
+            "class<.*telegram.*>": "",
+            "class<.*[Ff]irefox.*>": "",
+            "class<.*[Gg]oogle-chrome.*>": "",
+            "class<.*[Cc]hromium.*>": "",
+            "class<.*jetbrains-idea.*>": "",
+            "class<.*jetbrains-pycharm.*>": "󰌠",
+            "class<.*jetbrains-webstorm.*>": "󰌛",
+            "class<.*jetbrains.*>": "",
+            "class<.*idea.*>": "",
+            "class<.*[Vv][Ss][Cc]ode.*>": "󰨞",
+            "class<.*code.*>": "󰨞",
+            "class<.*[Vv]scodium.*>": "󰨞",
+            "class<.*devin.*>": "󰨞",
+            "class<.*antigravity.*>": "󰨞",
+            "class<.*[Kk]itty.*>": "",
+            "class<.*[Aa]lacritty.*>": "",
+            "class<.*[Ff]oot.*>": "",
+            "class<.*[Ww]ezterm.*>": "",
+            "class<.*terminal.*>": "",
+            "class<.*[Nn]autilus.*>": "󰝰",
+            "class<.*[Tt]hunar.*>": "󰝰",
+            "class<.*[Dd]olphin.*>": "󰝰",
+            "class<.*steam.*>": "󰓓",
+            "class<.*discord.*>": "󰙯",
+            "class<.*vesktop.*>": "󰙯",
+            "class<.*spotify.*>": "󰓇",
+            "class<.*pavucontrol.*>": "󰕾",
+            "class<.*blueman.*>": "󰂯",
+            "class<.*gnome-control-center.*>": "󰒓",
+            "class<.*[Ss]ettings.*>": "󰒓",
+            "class<.*btop.*>": "󰍛",
+            "class<.*htop.*>": "󰍛",
+            "class<.*dbeaver.*>": "󰆼",
+            "class<.*postman.*>": "󱠘",
+            "class<.*insomnia.*>": "󰢩",
+            "class<.*obsidian.*>": "󱓧",
+            "class<.*slack.*>": "󰒱",
+            "class<.*gimp.*>": "",
+            "class<.*inkscape.*>": "",
+            "class<.*vlc.*>": "󰕼",
+            "class<.*obs.*>": "󰐌",
+            "class<.*libreoffice-writer.*>": "󰏆",
+            "class<.*libreoffice-calc.*>": "󰓒",
+            "class<.*libreoffice.*>": "󰏆"
+        }
+    },
+    "clock": {
+        "format": "{:%H\n%M}",
+        "interval": 1,
+        "tooltip-format": "<big>{:%d/%m/%Y}</big>\n<tt><small>{calendar}</small></tt>",
+        "on-click": "~/.config/hypr/scripts/calendar.sh toggle",
+        "cursor": true
+    },
+    "cpu": {
+        "format": "󰍛\n{usage}",
+        "interval": 2,
+        "states": { "warning": 70, "critical": 90 },
+        "tooltip": true,
+        "on-click": "~/.config/hypr/scripts/btop.sh HDMI-A-1"
+    },
+    "memory": {
+        "format": "󰘚\n{percentage}",
+        "interval": 2,
+        "states": { "warning": 75, "critical": 92 },
+        "tooltip-format": "RAM: {used:0.1f}GiB / {total:0.1f}GiB"
+    },
+    "pulseaudio": {
+        "format": "{icon}",
+        "format-muted": "󰝟",
+        "format-icons": {
+            "default": ["󰕿", "󰖀", "󰕾"]
+        },
+        "tooltip-format": "Volume: {volume}%",
+        "on-click": "pavucontrol",
+        "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+    },
+    "network": {
+        "format-wifi": "󰤨",
+        "format-ethernet": "󰈀",
+        "format-disconnected": "󰤭",
+        "tooltip-format": "{ifname}: {ipaddr}",
+        "on-click": "~/.config/hypr/scripts/network-settings.sh",
+        "on-click-right": "nm-connection-editor"
+    },
+    "tray": {
+        "icon-size": 16,
+        "spacing": 8
+    }
+},
+{
+    "name": "waybar-main",
+    "layer": "top",
+    "position": "top",
+    "output": "DP-1",
+    "height": 39,
+    "margin-top": 8,
+    "margin-left": 12,
+    "margin-right": 12,
+    "spacing": 8,
+    "reload_style_on_change": true,
+    "modules-left": ["hyprland/workspaces", "hyprland/window"],
+    "modules-center": ["clock"],
+    "modules-right": ["pulseaudio", "tray", "custom/power"],
+
+    "bluetooth": {
+        "format": "󰂯",
+        "format-disabled": "󰂲 Off",
+        "format-connected": "󰂱 {device_alias}",
+        "format-connected-battery": "󰂱 {device_alias} {device_battery_percentage}%",
+        "tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} conectados",
+        "tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{num_connections} conectados\n\n{device_enumerate}",
+        "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
+        "on-click": "blueman-manager"
+    },
+
+
+    "custom/power": {
+        "exec": "~/.config/hypr/scripts/powermenu.sh json",
+        "return-type": "json",
+        "interval": "once",
+        "on-click": "~/.config/hypr/scripts/powermenu.sh toggle"
+    },
+
+    "custom/updates": {
+        "exec": "~/.config/hypr/scripts/updates.sh json main",
+        "return-type": "json",
+        "interval": 30,
+        "signal": 10,
+        "on-click": "~/.config/hypr/scripts/updates.sh open",
+        "on-click-right": "~/.config/hypr/scripts/updates.sh menu",
+        "on-click-middle": "~/.config/hypr/scripts/updates.sh refresh"
+    },
+
+    "custom/keybinds": {
+        "exec": "~/.config/hypr/scripts/keybinds.sh json",
+        "return-type": "json",
+        "interval": "once",
+        "signal": 11,
+        "on-click": "~/.config/hypr/scripts/keybinds.sh toggle"
+    },
+
+    "custom/nightlight": {
+        "exec": "~/.config/hypr/scripts/nightlight.sh json",
+        "return-type": "json",
+        "interval": "once",
+        "signal": 9,
+        "on-click": "~/.config/hypr/scripts/nightlight.sh toggle",
+        "on-scroll-up": "~/.config/hypr/scripts/nightlight.sh cooler",
+        "on-scroll-down": "~/.config/hypr/scripts/nightlight.sh warmer"
+    },
+
+    "custom/wallpaper": {
+        "exec": "~/.config/hypr/scripts/wallpaper.sh json",
+        "return-type": "json",
+        "interval": "once",
+        "signal": 8,
+        "on-click": "~/.config/hypr/scripts/wallpaper.sh next",
+        "on-click-right": "~/.config/hypr/scripts/wallpaper.sh prev",
+        "on-click-middle": "~/.config/hypr/scripts/wallpaper.sh random",
+        "on-scroll-up": "~/.config/hypr/scripts/wallpaper.sh prev",
+        "on-scroll-down": "~/.config/hypr/scripts/wallpaper.sh next"
+    },
+
+    "hyprland/workspaces": {
+        "cursor": true,
+        "disable-scroll": false,
+        "all-outputs": false,
+        "active-only": false,
+        "on-scroll-up": "hyprctl dispatch focusmonitor DP-1 && hyprctl dispatch workspace m-1",
+        "on-scroll-down": "hyprctl dispatch focusmonitor DP-1 && hyprctl dispatch workspace m+1",
+        "on-click": "activate",
+        "format": "{icon} {windows}",
+        "format-window-separator": " ",
+        "window-rewrite-default": "󰖯",
+        "window-rewrite": {
+            "title<.*youtube.*>": "",
+            "title<.*github.*>": "",
+            "title<.*whatsapp.*>": "",
+            "class<.*whatsapp.*>": "",
+            "class<.*telegram.*>": "",
+            "class<.*[Ff]irefox.*>": "",
+            "class<.*[Gg]oogle-chrome.*>": "",
+            "class<.*[Cc]hromium.*>": "",
+            "class<.*jetbrains-idea.*>": "",
+            "class<.*jetbrains-pycharm.*>": "󰌠",
+            "class<.*jetbrains-webstorm.*>": "󰌛",
+            "class<.*jetbrains.*>": "",
+            "class<.*idea.*>": "",
+            "class<.*[Vv][Ss][Cc]ode.*>": "󰨞",
+            "class<.*code.*>": "󰨞",
+            "class<.*[Vv]scodium.*>": "󰨞",
+            "class<.*devin.*>": "󰨞",
+            "class<.*antigravity.*>": "󰨞",
+            "class<.*[Kk]itty.*>": "",
+            "class<.*[Aa]lacritty.*>": "",
+            "class<.*[Ff]oot.*>": "",
+            "class<.*[Ww]ezterm.*>": "",
+            "class<.*terminal.*>": "",
+            "class<.*[Nn]autilus.*>": "󰝰",
+            "class<.*[Tt]hunar.*>": "󰝰",
+            "class<.*[Dd]olphin.*>": "󰝰",
+            "class<.*steam.*>": "󰓓",
+            "class<.*discord.*>": "󰙯",
+            "class<.*vesktop.*>": "󰙯",
+            "class<.*spotify.*>": "󰓇",
+            "class<.*pavucontrol.*>": "󰕾",
+            "class<.*blueman.*>": "󰂯",
+            "class<.*gnome-control-center.*>": "󰒓",
+            "class<.*[Ss]ettings.*>": "󰒓",
+            "class<.*btop.*>": "󰍛",
+            "class<.*htop.*>": "󰍛",
+            "class<.*dbeaver.*>": "󰆼",
+            "class<.*postman.*>": "󱠘",
+            "class<.*insomnia.*>": "󰢩",
+            "class<.*obsidian.*>": "󱓧",
+            "class<.*slack.*>": "󰒱",
+            "class<.*gimp.*>": "",
+            "class<.*inkscape.*>": "",
+            "class<.*vlc.*>": "󰕼",
+            "class<.*obs.*>": "󰐌",
+            "class<.*libreoffice-writer.*>": "󰏆",
+            "class<.*libreoffice-calc.*>": "󰓒",
+            "class<.*libreoffice.*>": "󰏆"
+        },
+        "format-icons": {
+            "11": "1", "12": "2", "13": "3", "14": "4", "15": "5",
+            "16": "6", "17": "7", "18": "8", "19": "9", "20": "10"
+        }
+    },
+    "hyprland/window": {
+        "format": "{class}",
+        "max-length": 30,
+        "separate-outputs": true,
+        "rewrite": {
+            "": "",
+            "(.*)[Gg]oogle-chrome(.*)": "Google Chrome",
+            "(.*)[Cc]hromium(.*)": "Chromium",
+            "(.*)[Ff]irefox(.*)": "Firefox",
+            "(.*)[Tt]elegram(.*)": "Telegram",
+            "(.*)[Vv][Ss][Cc]ode(.*)|(.*)code(.*)|(.*)[Vv]scodium(.*)": "Visual Studio Code",
+            "(.*)jetbrains-idea(.*)|(.*)idea(.*)": "IntelliJ IDEA",
+            "(.*)jetbrains-pycharm(.*)|(.*)pycharm(.*)": "PyCharm",
+            "(.*)jetbrains-webstorm(.*)|(.*)webstorm(.*)": "WebStorm",
+            "(.*)jetbrains-clion(.*)|(.*)clion(.*)": "CLion",
+            "(.*)jetbrains(.*)": "JetBrains",
+            "(.*)[Dd]evin(.*)": "Devin",
+            "(.*)[Aa]ntigravity(.*)": "Antigravity",
+            "(.*)[Nn]autilus(.*)|(.*)[Tt]hunar(.*)|(.*)[Dd]olphin(.*)": "Arquivos",
+            "(.*)[Kk]itty(.*)|(.*)[Aa]lacritty(.*)|(.*)[Ff]oot(.*)|(.*)[Ww]ezterm(.*)|(.*)terminal(.*)": "Terminal",
+            "(.*)[Dd]iscord(.*)|(.*)[Vv]esktop(.*)": "Discord",
+            "(.*)[Ss]potify(.*)": "Spotify",
+            "(.*)[Ss]team(.*)": "Steam",
+            "(.*)[Pp]avucontrol(.*)": "Controle de Volume",
+            "(.*)[Bb]lueman(.*)": "Bluetooth",
+            "(.*)gnome-control-center(.*)|(.*)[Ss]ettings(.*)": "Configurações",
+            "(.*)[Bb]top(.*)|(.*)[Hh]top(.*)|(.*)system-monitor(.*)": "Monitor do Sistema",
+            "(.*)[Dd][Bb]eaver(.*)": "DBeaver",
+            "(.*)[Pp]ostman(.*)": "Postman",
+            "(.*)[Ii]nsomnia(.*)": "Insomnia",
+            "(.*)[Oo]bsidian(.*)": "Obsidian",
+            "(.*)[Ss]lack(.*)": "Slack",
+            "(.*)[Ww]hats[Aa]pp(.*)": "WhatsApp",
+            "(.*)[Gg]imp(.*)": "GIMP",
+            "(.*)[Ii]nkscape(.*)": "Inkscape",
+            "(.*)[Vv]lc(.*)": "VLC Media Player",
+            "(.*)[Oo][Bb][Ss](.*)": "OBS Studio",
+            "(.*)[Ll]ibreoffice-writer(.*)": "LibreOffice Writer",
+            "(.*)[Ll]ibreoffice-calc(.*)": "LibreOffice Calc",
+            "(.*)[Ll]ibreoffice(.*)": "LibreOffice",
+            "(.*)thunderbird(.*)": "Thunderbird"
+        }
+    },
+    "clock": {
+        "format": "󰥔 {:%H:%M:%S  -  %d/%m/%Y}",
+        "interval": 1,
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+        "on-click": "~/.config/hypr/scripts/calendar.sh toggle",
+        "cursor": true
+    },
+    "cpu": {
+        "format": "󰍛 {usage}%",
+        "interval": 2,
+        "states": { "warning": 70, "critical": 90 },
+        "tooltip": true,
+        "on-click": "~/.config/hypr/scripts/btop.sh DP-1"
+    },
+    "memory": {
+        "format": "󰘚 {percentage}%",
+        "interval": 2,
+        "states": { "warning": 75, "critical": 92 },
+        "tooltip-format": "RAM: {used:0.1f}GiB / {total:0.1f}GiB"
+    },
+    "pulseaudio": {
+        "format": "{icon} {volume}%",
+        "format-muted": "󰝟 Mute",
+        "format-icons": {
+            "default": ["󰕿", "󰖀", "󰕾"]
+        },
+        "tooltip-format": "Volume: {volume}% ({desc})",
+        "scroll-step": 5,
+        "on-click": "pavucontrol",
+        "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+        "cursor": true
+    },
+    "network": {
+        "format-wifi": "󰤨 {essid}",
+        "format-ethernet": "󰈀 Conectado",
+        "format-disconnected": "󰤭 Off",
+        "tooltip-format": "{ifname}: {ipaddr}",
+        "on-click": "~/.config/hypr/scripts/network-settings.sh",
+        "on-click-right": "nm-connection-editor"
+    },
+    "tray": {
+        "icon-size": 18,
+        "spacing": 10
+    }
+}
+]

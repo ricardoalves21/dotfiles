@@ -1,0 +1,263 @@
+#!/usr/bin/env python3
+"""
+Player de vídeo em camadas Wayland (wlr-layer-shell) usando GTK3 + GStreamer + libgtk-layer-shell.
+Compatível com a CLI do mpvpaper usada pelos scripts do Hyprland (lock.sh, lockvideo.sh, videowallpaper.sh).
+"""
+import ctypes
+import json
+import os
+import signal
+import subprocess
+import sys
+from urllib.parse import urlparse
+
+import cairo
+import gi
+
+gi.require_version("Gtk", "3.0")
+gi.require_version("Gdk", "3.0")
+gi.require_version("Gst", "1.0")
+from gi.repository import Gdk, GLib, Gst, Gtk
+try:
+    from gi.repository import GLibUnix
+except ImportError:
+    GLibUnix = None
+
+LAYER_MAP = {
+    "background": 0,
+    "bottom": 1,
+    "top": 2,
+    "overlay": 3,
+}
+
+
+class PyGObjectCPointer(ctypes.Structure):
+    _fields_ = [
+        ("PyObject_HEAD", ctypes.c_byte * object.__basicsize__),
+        ("obj", ctypes.c_void_p),
+    ]
+
+
+def gobj_ptr(gobj):
+    return PyGObjectCPointer.from_address(id(gobj)).obj
+
+
+def load_layer_shell():
+    ls = ctypes.CDLL("libgtk-layer-shell.so.0")
+    ls.gtk_layer_init_for_window.argtypes = [ctypes.c_void_p]
+    ls.gtk_layer_set_layer.argtypes = [ctypes.c_void_p, ctypes.c_int]
+    ls.gtk_layer_set_anchor.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_bool]
+    ls.gtk_layer_set_exclusive_zone.argtypes = [ctypes.c_void_p, ctypes.c_int]
+    ls.gtk_layer_set_keyboard_mode.argtypes = [ctypes.c_void_p, ctypes.c_int]
+    ls.gtk_layer_set_monitor.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+    ls.gtk_layer_set_namespace.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+    return ls
+
+
+def parse_args(argv):
+    layer = "background"
+    mpv_opts = ""
+    fork = False
+    positional = []
+
+    i = 0
+    while i < len(argv):
+        arg = argv[i]
+        if arg in ("-h", "--help"):
+            print("Uso: mpvpaper [-l layer] [-o opts] [-p] [-f] <output|ALL> <video>")
+            sys.exit(0)
+        elif arg in ("-l", "--layer") and i + 1 < len(argv):
+            layer = argv[i + 1].lower()
+            i += 2
+        elif arg.startswith("--layer="):
+            layer = arg.split("=", 1)[1].lower()
+            i += 1
+        elif arg in ("-o", "--mpv-options") and i + 1 < len(argv):
+            mpv_opts = argv[i + 1]
+            i += 2
+        elif arg.startswith("--mpv-options="):
+            mpv_opts = arg.split("=", 1)[1]
+            i += 1
+        elif arg in ("-p", "--auto-pause", "-s", "--auto-stop", "-v", "--verbose"):
+            i += 1
+        elif arg in ("-f", "--fork"):
+            fork = True
+            i += 1
+        elif arg == "--":
+            positional.extend(argv[i + 1 :])
+            break
+        else:
+            positional.append(arg)
+            i += 1
+
+    if len(positional) < 2:
+        print("Uso: mpvpaper [-l layer] [-o opts] [-p] [-f] <output|ALL> <video>", file=sys.stderr)
+        sys.exit(1)
+
+    return layer, mpv_opts, fork, positional[0], positional[1]
+
+
+def get_hypr_monitors():
+    try:
+        out = subprocess.check_output(["hyprctl", "monitors", "-j"], stderr=subprocess.DEVNULL, text=True)
+        return json.loads(out)
+    except Exception:
+        return []
+
+
+def resolve_monitors(target_output):
+    display = Gdk.Display.get_default()
+    if display is None:
+        return []
+
+    n = display.get_n_monitors()
+    gdk_monitors = [display.get_monitor(i) for i in range(n)]
+
+    if target_output.upper() in ("ALL", "*"):
+        return gdk_monitors
+
+    hypr_mons = get_hypr_monitors()
+    target_hypr = next((m for m in hypr_mons if m.get("name") == target_output), None)
+    if target_hypr:
+        tx, ty = target_hypr.get("x"), target_hypr.get("y")
+        tmodel = target_hypr.get("model", "")
+        for gm in gdk_monitors:
+            geom = gm.get_geometry()
+            if geom.x == tx and geom.y == ty:
+                return [gm]
+        for gm in gdk_monitors:
+            if gm.get_model() and gm.get_model() == tmodel:
+                return [gm]
+
+    return gdk_monitors[:1] if gdk_monitors else []
+
+
+def make_uri(path_or_uri):
+    parsed = urlparse(path_or_uri)
+    if parsed.scheme in ("file", "http", "https", "rtsp"):
+        return path_or_uri
+    return Gst.filename_to_uri(os.path.abspath(path_or_uri))
+
+
+def main():
+    layer_name, mpv_opts, fork, target_output, video_source = parse_args(sys.argv[1:])
+
+    if not os.path.exists(video_source) and "://" not in video_source:
+        print(f"Arquivo não encontrado: {video_source}", file=sys.stderr)
+        sys.exit(1)
+
+    if fork and os.fork() > 0:
+        sys.exit(0)
+
+    Gtk.init([])
+    Gst.init([])
+
+    ls = load_layer_shell()
+    monitors = resolve_monitors(target_output)
+    if not monitors:
+        print("Nenhum monitor encontrado.", file=sys.stderr)
+        sys.exit(1)
+
+    layer_val = LAYER_MAP.get(layer_name, 0)
+    mute = "--no-audio" in mpv_opts or "mute" in mpv_opts or True
+    loop = "--loop-file=no" not in mpv_opts
+
+    # Fundo preto para evitar flash branco antes do primeiro frame
+    css_provider = Gtk.CssProvider()
+    css_provider.load_from_data(b"window { background-color: #000000; }")
+    Gtk.StyleContext.add_provider_for_screen(
+        Gdk.Screen.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+    )
+
+    bin_sink = Gst.Bin.new("multi_sink")
+    tee = Gst.ElementFactory.make("tee", "tee")
+    bin_sink.add(tee)
+
+    windows = []
+    for idx, mon in enumerate(monitors):
+        queue = Gst.ElementFactory.make("queue", f"q_{idx}")
+        queue.set_property("max-size-buffers", 4)
+        sink = Gst.ElementFactory.make("gtksink", f"gtksink_{idx}")
+        if sink is None:
+            print("Elemento GStreamer 'gtksink' indisponível.", file=sys.stderr)
+            sys.exit(1)
+        sink.set_property("force-aspect-ratio", True)
+        sink.set_property("sync", True)
+
+        bin_sink.add(queue)
+        bin_sink.add(sink)
+        tee.link(queue)
+        queue.link(sink)
+
+        win = Gtk.Window()
+        win.set_decorated(False)
+        win.set_app_paintable(True)
+
+        wptr = gobj_ptr(win)
+        ls.gtk_layer_init_for_window(wptr)
+        ls.gtk_layer_set_layer(wptr, layer_val)
+        ls.gtk_layer_set_monitor(wptr, gobj_ptr(mon))
+        ls.gtk_layer_set_exclusive_zone(wptr, -1)
+        ls.gtk_layer_set_keyboard_mode(wptr, 0)
+        ls.gtk_layer_set_namespace(wptr, b"mpvpaper")
+        for edge in (0, 1, 2, 3):
+            ls.gtk_layer_set_anchor(wptr, edge, True)
+
+        widget = sink.props.widget
+        widget.set_hexpand(True)
+        widget.set_vexpand(True)
+        win.add(widget)
+        win.connect("realize", lambda w: w.input_shape_combine_region(cairo.Region()))
+        windows.append(win)
+
+    ghost = Gst.GhostPad.new("sink", tee.get_static_pad("sink"))
+    bin_sink.add_pad(ghost)
+
+    playbin = Gst.ElementFactory.make("playbin", "player")
+    playbin.set_property("uri", make_uri(video_source))
+    playbin.set_property("mute", mute)
+    playbin.set_property("flags", 0x00000001)  # Apenas vídeo (sem áudio/legendas)
+    playbin.set_property("video-sink", bin_sink)
+
+    bus = playbin.get_bus()
+    bus.add_signal_watch()
+
+    def on_eos(_bus, _msg):
+        if loop:
+            playbin.seek_simple(
+                Gst.Format.TIME,
+                Gst.SeekFlags.FLUSH | Gst.SeekFlags.KEY_UNIT,
+                0,
+            )
+        else:
+            Gtk.main_quit()
+
+    def on_error(_bus, msg):
+        err, debug = msg.parse_error()
+        print(f"Erro GStreamer: {err} ({debug})", file=sys.stderr)
+        Gtk.main_quit()
+
+    bus.connect("message::eos", on_eos)
+    bus.connect("message::error", on_error)
+
+    for win in windows:
+        win.show_all()
+
+    playbin.set_state(Gst.State.PLAYING)
+
+    def shutdown(*_args):
+        playbin.set_state(Gst.State.NULL)
+        Gtk.main_quit()
+
+    add_sig = GLibUnix.signal_add if GLibUnix is not None else GLib.unix_signal_add
+    add_sig(GLib.PRIORITY_DEFAULT, signal.SIGINT, shutdown)
+    add_sig(GLib.PRIORITY_DEFAULT, signal.SIGTERM, shutdown)
+
+    try:
+        Gtk.main()
+    finally:
+        playbin.set_state(Gst.State.NULL)
+
+
+if __name__ == "__main__":
+    main()
