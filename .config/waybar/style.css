@@ -326,7 +326,7 @@ window#waybar.empty #window {
     color: #ffffff;
 }
 
-#cpu, #memory, #pulseaudio, #bluetooth, #network, #tray {
+#cpu, #memory, #pulseaudio, #bluetooth, #custom-youtube, #network, #tray {
     background-color: @surface;
     border-radius: 10px;
     padding: 2px 12px;
@@ -334,17 +334,24 @@ window#waybar.empty #window {
     color: @text;
 }
 
-#cpu:hover, #memory:hover, #pulseaudio:hover, #bluetooth:hover, #network:hover {
+#cpu:hover, #memory:hover, #pulseaudio:hover, #bluetooth:hover, #custom-youtube:hover, #network:hover {
     background-color: @surface_hi;
     box-shadow: 0 0 12px rgba(200, 200, 220, 0.18);
 }
 
-#cpu        { color: @dim; }
-#memory     { color: @accent; }
-#pulseaudio { color: @accent_hi; }
-#bluetooth  { color: #89b4fa; }
+#cpu             { color: @dim; }
+#memory          { color: @accent; }
+#pulseaudio      { color: @accent_hi; }
+#bluetooth       { color: #89b4fa; }
 #bluetooth.disabled { color: @muted; }
-#network    { color: @dim; }
+#custom-youtube  { color: #f38ba8; }
+#custom-youtube.playing { color: #f38ba8; }
+#custom-youtube.paused  { color: #fab387; }
+#custom-youtube.disconnected { color: @muted; }
+#custom-youtube:hover {
+    box-shadow: 0 0 12px rgba(243, 139, 168, 0.35);
+}
+#network         { color: @dim; }
 
 /* estados de alerta animados */
 #cpu.warning, #memory.warning {

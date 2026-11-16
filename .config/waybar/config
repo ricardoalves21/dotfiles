@@ -189,7 +189,16 @@
     "reload_style_on_change": true,
     "modules-left": ["hyprland/workspaces", "hyprland/window"],
     "modules-center": ["clock"],
-    "modules-right": ["pulseaudio", "tray", "custom/power"],
+    "modules-right": ["pulseaudio", "bluetooth", "custom/youtube", "tray", "custom/power"],
+
+    "custom/youtube": {
+        "exec": "~/.config/hypr/scripts/youtube-player.sh status",
+        "return-type": "json",
+        "interval": 2,
+        "on-click": "~/.config/hypr/scripts/youtube-player.sh toggle",
+        "tooltip": true,
+        "cursor": true
+    },
 
     "bluetooth": {
         "format": "󰂯",
