@@ -428,6 +428,8 @@ def classify_and_describe(
                 lbl = "Pausar / reproduzir mídia" if "pause" in key_low else "Reproduzir / pausar mídia"
                 return ("midia", 32, lbl)
             return ("midia", 35, f"Controle de mídia ({cmd})")
+        if "youtube-player.sh" in cmd or "youtube-miniplayer" in cmd:
+            return ("midia", 33, "Abrir / fechar YouTube Miniplayer")
 
         # Comentário inline no hyprland.conf para novos atalhos customizados
         inline = inline_comments.get((disp_low, arg))

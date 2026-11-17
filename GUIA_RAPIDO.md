@@ -136,6 +136,7 @@ Como cada computador tem monitores e saídas de vídeo diferentes (`HDMI-A-1`, `
 ### Wallpapers e Multimídia
 | Atalho | Ação |
 |---|---|
+| `SUPER + Y` | **Abrir / fechar YouTube Miniplayer flutuante ()** |
 | `SUPER + W` | Abrir seletor visual de wallpapers (`hyprquickpaper`) |
 | `SUPER + SHIFT + W` | Wallpaper anterior |
 | `SUPER + ALT + W` | Wallpaper aleatório |

@@ -357,8 +357,9 @@ class YouTubeMiniplayer(Gtk.Window):
         self.btn_play.set_label("󰐊 Play" if self.is_paused else "󰏤 Pause")
         self.last_tick_time = time.time()
 
-        # 2. Envia comando ao daemon em thread secundária
-        self.send_cmd_async("toggle")
+        # 2. Envia comando explícito (play ou pause) ao daemon em thread secundária
+        action = "pause" if self.is_paused else "play"
+        self.send_cmd_async(action)
 
     def on_skip_click(self, seconds):
         # Registra o instante do salto e atualiza a posição local imediatamente

@@ -240,9 +240,22 @@ def execute_command(action, value=None):
     # 1. Envia via WebSocket se houver extensão conectada
     broadcast_ws({"action": action, "value": value})
 
-    # 2. Executa via injeção direta no Hyprland
+    # 2. Executa controle de mídia
     if action in ("toggle", "play", "pause"):
-        send_key_to_youtube("k")
+        if action == "play":
+            cmd = ["playerctl", "--player=firefox,%any", "play"]
+        elif action == "pause":
+            cmd = ["playerctl", "--player=firefox,%any", "pause"]
+        else:
+            cmd = ["playerctl", "--player=firefox,%any", "play-pause"]
+
+        try:
+            res = subprocess.run(cmd, capture_output=True, timeout=0.3)
+            if res.returncode != 0:
+                send_key_to_youtube("k")
+        except Exception:
+            send_key_to_youtube("k")
+
         with state_lock:
             now = time.time()
             if not state["paused"]:
@@ -253,7 +266,14 @@ def execute_command(action, value=None):
                     state["currentTime"] += elapsed * state.get("playbackRate", 1.0)
                     if state.get("duration", 0.0) > 0:
                         state["currentTime"] = min(state["duration"], state["currentTime"])
-            state["paused"] = not state["paused"]
+
+            if action == "toggle":
+                state["paused"] = not state["paused"]
+            elif action == "play":
+                state["paused"] = False
+            elif action == "pause":
+                state["paused"] = True
+
             state["positionTimestamp"] = now
             state["lastUpdate"] = now
 

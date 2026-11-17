@@ -189,7 +189,17 @@
     "reload_style_on_change": true,
     "modules-left": ["hyprland/workspaces", "hyprland/window"],
     "modules-center": ["clock"],
-    "modules-right": ["pulseaudio", "bluetooth", "custom/youtube", "tray", "custom/power"],
+    "modules-right": ["custom/tasks", "pulseaudio", "bluetooth", "custom/youtube", "tray", "custom/power"],
+
+    "custom/tasks": {
+        "exec": "~/.config/hypr/scripts/calendar-tasks.py status",
+        "return-type": "json",
+        "interval": 4,
+        "signal": 12,
+        "on-click": "~/.config/hypr/scripts/calendar.sh toggle",
+        "tooltip": true,
+        "cursor": true
+    },
 
     "custom/youtube": {
         "exec": "~/.config/hypr/scripts/youtube-player.sh status",

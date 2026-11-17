@@ -114,6 +114,7 @@ Ao clonar em outra máquina, ajuste os nomes dos monitores em `hyprland.conf`
 | `Super + M` | sair / desligar |
 | `Super + L` | tela de bloqueio (vídeo de fundo + hyprlock) |
 | `Super + I` | escolher o vídeo de fundo do bloqueio |
+| `Super + Y` | abrir / fechar YouTube Miniplayer |
 | `Super + P` | modo pseudo (dwindle) |
 | `Super + J` | alternar divisão da tela |
 
