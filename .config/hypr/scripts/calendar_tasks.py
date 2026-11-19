@@ -119,6 +119,34 @@ def delete_task(task_id):
         return True
     return False
 
+def edit_task(task_id, date_str, time_str, description, priority=False, reminder_min=0):
+    tasks = load_tasks()
+    updated = False
+    for t in tasks:
+        if str(t.get("id")) == str(task_id):
+            old_time = t.get("time")
+            old_date = t.get("date")
+            t["date"] = date_str.strip()
+            t["time"] = time_str.strip()
+            t["description"] = description.strip()
+            t["priority"] = bool(priority)
+            t["reminder_min"] = int(reminder_min)
+            if old_time != t["time"] or old_date != t["date"]:
+                try:
+                    new_dt = datetime.strptime(f"{t['date']} {t['time']}", "%Y-%m-%d %H:%M")
+                    if new_dt > datetime.now():
+                        t["reminded"] = False
+                        t["due_alerted"] = False
+                except ValueError:
+                    pass
+            updated = True
+            break
+    if updated:
+        save_tasks(tasks)
+        notify_waybar()
+        return True
+    return False
+
 def toggle_task(task_id):
     tasks = load_tasks()
     updated = False

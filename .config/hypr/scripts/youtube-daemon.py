@@ -128,10 +128,11 @@ def check_mpris():
                 state["title"] = title
                 state["author"] = artist if artist else state.get("author", "")
 
-                # 1. Se trocou de vídeo, reseta posição
+                # 1. Se trocou de vídeo, reseta posição e velocidade para o normal (1.0x)
                 if not same_video:
                     state["currentTime"] = curr
                     state["positionTimestamp"] = now
+                    state["playbackRate"] = 1.0
                     last_mpris_raw_curr = curr
 
                 # 2. Se o estado de pausa mudou externamente (ex: usuário pausou/despausou no navegador)
@@ -337,6 +338,12 @@ def execute_command(action, value=None):
                 for _ in range(abs(diff_steps)):
                     send_key_to_youtube("comma", "SHIFT")
                     time.sleep(0.03)
+
+    elif action == "resetRate":
+        with state_lock:
+            state["playbackRate"] = 1.0
+            state["positionTimestamp"] = time.time()
+            state["lastUpdate"] = time.time()
 
     elif action == "seek":
         last_seek_time = time.time()

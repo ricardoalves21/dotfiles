@@ -47,6 +47,7 @@ class CalendarWindow(Gtk.Window):
         self.view_year = now.year
         self.view_month = now.month
         self.selected_date = now.date()
+        self.editing_task_id = None
 
         css_provider = Gtk.CssProvider()
         css = """
@@ -287,6 +288,9 @@ class CalendarWindow(Gtk.Window):
         button.task-btn.check:hover {
             color: #a6e3a1;
         }
+        button.task-btn.edit:hover {
+            color: #cba6f7;
+        }
         button.task-btn.del:hover {
             color: #f38ba8;
         }
@@ -298,6 +302,12 @@ class CalendarWindow(Gtk.Window):
             border-radius: 10px;
             padding: 10px;
             margin-bottom: 10px;
+        }
+        .form-title {
+            color: #cba6f7;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 2px;
         }
         .form-label {
             color: #cdd6f4;
@@ -533,6 +543,11 @@ class CalendarWindow(Gtk.Window):
         self.form_box.set_no_show_all(True)
         self.tasks_panel.pack_start(self.form_box, False, False, 0)
 
+        self.form_title = Gtk.Label(label="Nova Tarefa")
+        self.form_title.set_xalign(0)
+        self.form_title.get_style_context().add_class("form-title")
+        self.form_box.pack_start(self.form_title, False, False, 0)
+
         form_grid = Gtk.Grid()
         form_grid.set_column_spacing(8)
         form_grid.set_row_spacing(6)
@@ -597,11 +612,11 @@ class CalendarWindow(Gtk.Window):
         self.set_hand_cursor(btn_cancel)
         form_actions.pack_start(btn_cancel, False, False, 0)
 
-        btn_save = Gtk.Button(label="Salvar Tarefa")
-        btn_save.get_style_context().add_class("save-btn")
-        btn_save.connect("clicked", lambda b: self.save_task_form())
-        self.set_hand_cursor(btn_save)
-        form_actions.pack_start(btn_save, False, False, 0)
+        self.btn_save = Gtk.Button(label="Salvar Tarefa")
+        self.btn_save.get_style_context().add_class("save-btn")
+        self.btn_save.connect("clicked", lambda b: self.save_task_form())
+        self.set_hand_cursor(self.btn_save)
+        form_actions.pack_start(self.btn_save, False, False, 0)
 
         self.form_box.pack_start(form_actions, False, False, 0)
 
@@ -658,14 +673,27 @@ class CalendarWindow(Gtk.Window):
         self.clock_label.set_text(now.strftime("%H:%M:%S"))
         return True
 
-    def show_task_form(self):
-        now = datetime.now()
-        # Sugerir horário arredondado para próximos minutos ou hora
-        sug_time = (now + timedelta(minutes=15)).strftime("%H:%M")
-        self.entry_time.set_text(sug_time)
-        self.entry_desc.set_text("")
-        self.check_priority.set_active(True)
-        self.combo_remind.set_active(1) # 10 minutos padrão
+    def show_task_form(self, task=None):
+        if task is None:
+            self.editing_task_id = None
+            self.form_title.set_text("Nova Tarefa")
+            self.btn_save.set_label("Salvar Tarefa")
+            now = datetime.now()
+            sug_time = (now + timedelta(minutes=15)).strftime("%H:%M")
+            self.entry_time.set_text(sug_time)
+            self.entry_desc.set_text("")
+            self.check_priority.set_active(True)
+            self.combo_remind.set_active_id("0")
+        else:
+            self.editing_task_id = task.get("id")
+            self.form_title.set_text("Editar Tarefa")
+            self.btn_save.set_label("Salvar Alterações")
+            self.entry_time.set_text(task.get("time", ""))
+            self.entry_desc.set_text(task.get("description", ""))
+            self.check_priority.set_active(bool(task.get("priority", False)))
+            rem_id = str(task.get("reminder_min", 0))
+            self.combo_remind.set_active_id(rem_id)
+
         self.form_box.set_no_show_all(False)
         self.form_box.show_all()
         self.form_box.set_no_show_all(True)
@@ -673,6 +701,7 @@ class CalendarWindow(Gtk.Window):
         self.entry_desc.grab_focus()
 
     def hide_task_form(self):
+        self.editing_task_id = None
         self.form_box.hide()
         self.btn_new_task.set_sensitive(True)
 
@@ -705,7 +734,11 @@ class CalendarWindow(Gtk.Window):
         date_str = self.selected_date.strftime("%Y-%m-%d")
 
         if calendar_tasks:
-            calendar_tasks.add_task(date_str, valid_time, desc_text, priority, reminder_min)
+            if self.editing_task_id:
+                calendar_tasks.edit_task(self.editing_task_id, date_str, valid_time, desc_text, priority, reminder_min)
+                self.editing_task_id = None
+            else:
+                calendar_tasks.add_task(date_str, valid_time, desc_text, priority, reminder_min)
 
         self.hide_task_form()
         self.render_days()
@@ -793,6 +826,15 @@ class CalendarWindow(Gtk.Window):
                 self.set_hand_cursor(btn_check)
                 row1.pack_start(btn_check, False, False, 0)
 
+                # Botão Editar (Ícone de lápis Nerd Font / Material Design)
+                btn_edit = Gtk.Button(label="󰏫")
+                btn_edit.get_style_context().add_class("task-btn")
+                btn_edit.get_style_context().add_class("edit")
+                btn_edit.set_tooltip_text("Editar tarefa")
+                btn_edit.connect("clicked", self.on_edit_task, task)
+                self.set_hand_cursor(btn_edit)
+                row1.pack_start(btn_edit, False, False, 0)
+
                 # Botão Excluir
                 btn_del = Gtk.Button(label="🗑")
                 btn_del.get_style_context().add_class("task-btn")
@@ -822,6 +864,9 @@ class CalendarWindow(Gtk.Window):
             calendar_tasks.toggle_task(task_id)
         self.render_days()
         self.render_tasks()
+
+    def on_edit_task(self, button, task):
+        self.show_task_form(task=task)
 
     def on_delete_task(self, button, task_id):
         if calendar_tasks:

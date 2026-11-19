@@ -327,6 +327,8 @@ class YouTubeMiniplayer(Gtk.Window):
             lbl = f"{sp}x" if sp != 1.0 else "1.0x"
             btn = Gtk.Button(label=lbl)
             btn.get_style_context().add_class("rate-btn")
+            if abs(sp - 1.0) < 0.05:
+                btn.get_style_context().add_class("active")
             btn.connect("clicked", lambda b, rate=sp: self.on_rate_click(rate))
             self.set_hand_cursor(btn)
             speed_box.pack_start(btn, False, False, 0)
